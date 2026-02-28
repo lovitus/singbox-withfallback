@@ -8,6 +8,15 @@ Welcome to the wiki page for the sing-box project.
 
 The universal proxy platform.
 
+## Fork Notice
+
+This documentation set is served from a fork:
+
+- Upstream: https://github.com/SagerNet/sing-box
+- Fork: https://github.com/lovitus/singbox-withfallback
+
+See [Fork Notes](/fork/) for fork-specific features and release details.
+
 ## License
 
 ```

@@ -8,13 +8,61 @@
 
 # sing-box
 
-The universal proxy platform.
+The universal proxy platform (forked edition).
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/sing-box.svg)](https://repology.org/project/sing-box/versions)
+
+## Upstream / Fork
+
+- Upstream project: https://github.com/SagerNet/sing-box
+- This fork: https://github.com/lovitus/singbox-withfallback
+
+## What Is Different In This Fork
+
+1. Added a new outbound group type: `fallback`.
+2. `fallback` supports ordered failover and automatic fallback-to-primary recovery.
+3. `fallback` supports configurable switch thresholds:
+   - `failure_threshold` (default `3`)
+   - `success_threshold` (default `3`)
+4. Release binaries are built with upstream default full-feature tags:
+   - `with_gvisor,with_quic,with_dhcp,with_wireguard,with_utls,with_acme,with_clash_api,with_tailscale,with_ccm,with_ocm,badlinkname,tfogo_checklinkname0`
+
+## Fallback Parameters
+
+`fallback` fields and behavior are documented in detail here:
+
+- English: `docs/configuration/outbound/fallback.md`
+- 中文: `docs/configuration/outbound/fallback.zh.md`
+
+Quick guidance:
+
+- Use default `3` for faster failover/recovery.
+- Use `10` if your network is noisy and you want fewer switch oscillations.
+
+## Verify Build Features
+
+Run:
+
+```bash
+sing-box version
+```
+
+Check that `Tags:` includes at least `with_quic` and other required feature tags.
 
 ## Documentation
 
 https://sing-box.sagernet.org
+
+Fork notes:
+
+- English: `docs/fork.md`
+- 中文: `docs/fork.zh.md`
+
+## Upstream Merge Guide
+
+See:
+
+- `UPSTREAM_MERGE.md`
 
 ## License
 

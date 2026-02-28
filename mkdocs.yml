@@ -1,7 +1,7 @@
 site_name: sing-box
 site_author: nekohasekai
-repo_url: https://github.com/SagerNet/sing-box
-repo_name: SagerNet/sing-box
+repo_url: https://github.com/lovitus/singbox-withfallback
+repo_name: lovitus/singbox-withfallback
 copyright: Copyright &copy; 2022 nekohasekai
 site_description: The universal proxy platform.
 remote_branch: docs
@@ -44,6 +44,7 @@ theme:
 nav:
   - Home:
       - index.md
+      - Fork Notes: fork.md
       - Change Log: changelog.md
       - Migration: migration.md
       - Deprecated: deprecated.md
@@ -214,7 +215,7 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/SagerNet/sing-box
+      link: https://github.com/lovitus/singbox-withfallback
   generator: false
 plugins:
   - search
@@ -232,6 +233,7 @@ plugins:
           name: 简体中文
           nav_translations:
             Home: 开始
+            Fork Notes: Fork 说明
             Change Log: 更新日志
             Migration: 迁移指南
             Deprecated: 废弃功能列表

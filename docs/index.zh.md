@@ -8,6 +8,15 @@ description: 欢迎来到该 sing-box 项目的文档页。
 
 通用代理平台。
 
+## Fork 说明
+
+当前文档来自一个 fork:
+
+- 上游仓库: https://github.com/SagerNet/sing-box
+- 本 fork: https://github.com/lovitus/singbox-withfallback
+
+更多 fork 特性与 release 说明见 [Fork 说明](/zh/fork/)。
+
 ## 授权
 
 ```
