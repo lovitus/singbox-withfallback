@@ -87,6 +87,8 @@ jobs:
           GOARM="${{ matrix.goarm }}"
           GOMIPS="${{ matrix.gomips }}"
           GOMIPS64="${{ matrix.gomips64 }}"
+          BUILD_TAGS="with_gvisor,with_quic,with_dhcp,with_wireguard,with_utls,with_acme,with_clash_api,with_tailscale,with_ccm,with_ocm,badlinkname,tfogo_checklinkname0"
+          LDFLAGS="-X github.com/sagernet/sing-box/constant.Version=${VERSION} -X internal/godebug.defaultGODEBUG=multipathtcp=0 -s -w -buildid= -checklinkname=0"
 
           mkdir -p dist out
           BIN_NAME="sing-box"
@@ -112,9 +114,10 @@ jobs:
                 export CC="i686-linux-android23-clang"
                 ;;
             esac
+            export CXX="${CC}++"
           fi
           export GOOS GOARCH GOARM GOMIPS GOMIPS64
-          go build -trimpath -ldflags "-s -w -X github.com/sagernet/sing-box/constant.Version=${VERSION}" -o "out/${BIN_NAME}" ./cmd/sing-box
+          go build -trimpath -tags "${BUILD_TAGS}" -ldflags "${LDFLAGS}" -o "out/${BIN_NAME}" ./cmd/sing-box
 
           PLATFORM="${GOOS}-${GOARCH}"
           if [[ -n "${GOARM}" ]]; then
