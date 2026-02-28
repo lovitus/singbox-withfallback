@@ -69,6 +69,13 @@ jobs:
         with:
           go-version: "1.25.7"
 
+      - name: Setup Android NDK
+        if: matrix.goos == 'android'
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r28
+          local-cache: true
+
       - name: Build and pack
         shell: bash
         run: |
@@ -88,6 +95,24 @@ jobs:
           fi
 
           export CGO_ENABLED=0
+          if [[ "$GOOS" == "android" ]]; then
+            export PATH="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin:${PATH}"
+            export CGO_ENABLED=1
+            case "$GOARCH" in
+              arm64)
+                export CC="aarch64-linux-android23-clang"
+                ;;
+              arm)
+                export CC="armv7a-linux-androideabi23-clang"
+                ;;
+              amd64)
+                export CC="x86_64-linux-android23-clang"
+                ;;
+              386)
+                export CC="i686-linux-android23-clang"
+                ;;
+            esac
+          fi
           export GOOS GOARCH GOARM GOMIPS GOMIPS64
           go build -trimpath -ldflags "-s -w -X github.com/sagernet/sing-box/constant.Version=${VERSION}" -o "out/${BIN_NAME}" ./cmd/sing-box
 
