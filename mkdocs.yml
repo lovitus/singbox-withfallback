@@ -172,6 +172,7 @@ nav:
           - SSH: configuration/outbound/ssh.md
           - DNS: configuration/outbound/dns.md
           - Selector: configuration/outbound/selector.md
+          - Fallback: configuration/outbound/fallback.md
           - URLTest: configuration/outbound/urltest.md
       - Service:
           - configuration/service/index.md

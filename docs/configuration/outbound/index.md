@@ -35,6 +35,7 @@
 | `ssh`          | [SSH](./ssh/)                   |
 | `dns`          | [DNS](./dns/)                   |
 | `selector`     | [Selector](./selector/)         |
+| `fallback`     | [Fallback](./fallback/)         |
 | `urltest`      | [URLTest](./urltest/)           |
 | `naive`        | [NaiveProxy](./naive/)          |
 
