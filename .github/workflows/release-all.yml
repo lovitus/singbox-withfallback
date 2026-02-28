@@ -1,0 +1,150 @@
+name: Release All Platforms
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version tag without leading v (example: 1.13.0-fallback.1)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.goos }}/${{ matrix.goarch }}${{ matrix.goarm != '' && format('/{0}', matrix.goarm) || '' }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: linux
+            goarch: "386"
+          - goos: linux
+            goarch: arm
+            goarm: "7"
+          - goos: linux
+            goarch: arm
+            goarm: "6"
+          - goos: linux
+            goarch: mipsle
+            gomips: softfloat
+          - goos: linux
+            goarch: mips64le
+            gomips64: softfloat
+          - goos: linux
+            goarch: riscv64
+          - goos: linux
+            goarch: loong64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+          - goos: windows
+            goarch: amd64
+          - goos: windows
+            goarch: "386"
+          - goos: windows
+            goarch: arm64
+          - goos: android
+            goarch: arm64
+          - goos: android
+            goarch: arm
+            goarm: "7"
+          - goos: android
+            goarch: amd64
+          - goos: android
+            goarch: "386"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.7"
+
+      - name: Build and pack
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION="${{ inputs.version }}"
+          GOOS="${{ matrix.goos }}"
+          GOARCH="${{ matrix.goarch }}"
+          GOARM="${{ matrix.goarm }}"
+          GOMIPS="${{ matrix.gomips }}"
+          GOMIPS64="${{ matrix.gomips64 }}"
+
+          mkdir -p dist out
+          BIN_NAME="sing-box"
+          if [[ "$GOOS" == "windows" ]]; then
+            BIN_NAME="${BIN_NAME}.exe"
+          fi
+
+          export CGO_ENABLED=0
+          export GOOS GOARCH GOARM GOMIPS GOMIPS64
+          go build -trimpath -ldflags "-s -w -X github.com/sagernet/sing-box/constant.Version=${VERSION}" -o "out/${BIN_NAME}" ./cmd/sing-box
+
+          PLATFORM="${GOOS}-${GOARCH}"
+          if [[ -n "${GOARM}" ]]; then
+            PLATFORM="${PLATFORM}v${GOARM}"
+          fi
+          if [[ -n "${GOMIPS}" ]]; then
+            PLATFORM="${PLATFORM}-${GOMIPS}"
+          fi
+          if [[ -n "${GOMIPS64}" ]]; then
+            PLATFORM="${PLATFORM}-${GOMIPS64}"
+          fi
+
+          PKG_BASENAME="sing-box-${VERSION}-${PLATFORM}"
+          PKG_DIR="dist/${PKG_BASENAME}"
+          mkdir -p "${PKG_DIR}"
+          cp "out/${BIN_NAME}" "${PKG_DIR}/${BIN_NAME}"
+          cp LICENSE README.md "${PKG_DIR}/"
+
+          if [[ "$GOOS" == "windows" ]]; then
+            (cd dist && zip -9 -r "${PKG_BASENAME}.zip" "${PKG_BASENAME}")
+          else
+            tar -C dist -czf "dist/${PKG_BASENAME}.tar.gz" "${PKG_BASENAME}"
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goarm != '' && format('-v{0}', matrix.goarm) || '' }}
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+
+  release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create or update release
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ inputs.version }}"
+          TAG="v${VERSION}"
+
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            gh release upload "${TAG}" dist/* --clobber
+          else
+            gh release create "${TAG}" dist/* --title "${TAG}" --notes "Automated all-platform build with fallback outbound support."
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
